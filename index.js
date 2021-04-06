@@ -33,18 +33,22 @@ Dietician.prototype = Object.create(Person.prototype);
 Dietician.prototype.constructor = Dietician;
 console.log(Dietician.prototype.constructor);
 
-function calculateImc() {
-  var height = parseFloat(document.getElementById('altura').value);
-  var weight = parseFloat(document.getElementById('peso').value);
-
-  var dietician = new Dietician(height, weight);
-
+function calculateImc(dietician) {
   console.log('dietician is a person?');
   console.log(dietician instanceof Person);
   renderImc(dietician);
 }
 
+function buildCalculateImc() {
+  var heightEl = document.getElementById('altura');
+  var weightEl = document.getElementById('peso');
+  
+  return function(evt) {
+    calculateImc(new Dietician(parseFloat(heightEl.value), parseFloat(weightEl.value)));
+  }
+}
+
 window.onload = function() {
   var btn = document.querySelector('.data .form button');
-  btn.addEventListener('click', calculateImc);
+  btn.addEventListener('click', buildCalculateImc());
 }
