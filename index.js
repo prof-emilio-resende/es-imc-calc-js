@@ -1,14 +1,43 @@
-function translateImc(imc) {
-  if (isNaN(imc)) return 'N/A';
+function createRequest() {
+  var request = null;
+  try {
+    request = new XMLHttpRequest();
+  } catch (tryMS) {
+    try {
+      request = new ActiveXObject("Msxml2.XMLHTTP");
+    } catch (otherMS) {
+      try {
+      request = new ActiveXObject("Microsoft.XMLHTTP");
+      } catch (failed) {
+        console.log('no way to create XMLHttpRequest object')
+      }
+    }
+  }
 
-  if (imc < 18.5) return 'magreza';
-  else if (imc < 24.9) return 'normal';
-  else if (imc < 30) return 'sobrepeso';
-  else return 'obesidade';
+  return request;
+}
+
+function calculateImcAPI(person) {
+  var request = createRequest();
+  if (!request) return null;
+
+  request.onreadystatechange = function() {
+    if (this.readyState === 4) {
+      if (this.status === 200) {
+        renderImc(JSON.parse(this.responseText));
+      }
+    }
+  };
+  request.open('POST', 'http://localhost:8080/imc/calculate', true);
+  request.setRequestHeader('Content-Type', 'application/json');
+  request.send(JSON.stringify({
+    'height': person.height,
+    'weight': person.weight
+  }));
 }
 
 function renderImc(person) {
-  document.getElementById('imc').innerHTML = parseFloat(person.imc()).toFixed(2) + ' ' + translateImc(person.imc());
+  document.getElementById('imc').innerHTML = parseFloat(person.imc).toFixed(2) + ' ' + person.imcDescription;
 }
 
 function Person(height, weight) {
@@ -24,9 +53,6 @@ function Person(height, weight) {
 
 function Dietician(height, weight) {
   Person.call(this, height, weight);
-  this.imc = function() {
-    return this.weight / this.height ** 2;
-  }
 }
 
 Dietician.prototype = Object.create(Person.prototype);
@@ -36,13 +62,14 @@ console.log(Dietician.prototype.constructor);
 function calculateImc(dietician) {
   console.log('dietician is a person?');
   console.log(dietician instanceof Person);
-  renderImc(dietician);
+
+  calculateImcAPI(dietician);
 }
 
 function buildCalculateImc() {
   var heightEl = document.getElementById('altura');
   var weightEl = document.getElementById('peso');
-  
+
   return function(evt) {
     calculateImc(new Dietician(parseFloat(heightEl.value), parseFloat(weightEl.value)));
   }
