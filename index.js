@@ -4,7 +4,11 @@ function translateImc(imc) {
   if (imc < 18.5) return 'magreza';
   else if (imc < 24.9) return 'normal';
   else if (imc < 30) return 'sobrepeso';
-  else return 'obesidade'
+  else return 'obesidade';
+}
+
+function renderImc(person) {
+  document.getElementById('imc').innerHTML = parseFloat(person.imc()).toFixed(2) + ' ' + translateImc(person.imc());
 }
 
 function Person(height, weight) {
@@ -37,8 +41,10 @@ function calculateImc() {
 
   console.log('dietician is a person?');
   console.log(dietician instanceof Person);
-
-  var imc = dietician.imc();
-  alert(parseFloat(imc).toFixed(2) + ' ' + translateImc(imc));
+  renderImc(dietician);
 }
 
+window.onload = function() {
+  var btn = document.querySelector('.data .form button');
+  btn.addEventListener('click', calculateImc);
+}
