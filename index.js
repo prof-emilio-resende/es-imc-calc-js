@@ -36,8 +36,55 @@ function calculateImcAPI(person) {
   }));
 }
 
+function calculateImcFetchAPI(person) {
+  var myHeaders = new Headers();
+  myHeaders.append('Content-Type', 'application/json');
+
+  var request = {
+    method: "POST",
+    headers: myHeaders,
+    body: JSON.stringify(person)
+  };
+
+  fetch('http://localhost:8080/imc/calculate', request)
+    .then(rawResponse => rawResponse.json())
+    .then(res => renderImc(res));
+}
+
+function callImcTableAPI() {
+  var myHeaders = new Headers();
+  myHeaders.append('Content-Type', 'application/json');
+
+  var request = {
+    method: "GET",
+    headers: myHeaders
+  };
+
+  fetch('http://localhost:8080/imc/table', request)
+    .then(rawResponse => rawResponse.json())
+    .then(res => renderTableImc(res));
+}
+
 function renderImc(person) {
   document.getElementById('imc').innerHTML = parseFloat(person.imc).toFixed(2) + ' ' + person.imcDescription;
+}
+
+function renderTableImc(tableData) {
+  var table = document.getElementById('imcTable');
+
+  Object.keys(tableData)
+    .sort()
+    .forEach(key => {
+      var newTableRow = table.insertRow(-1);
+      var keyCell = newTableRow.insertCell(0);
+      var keyText = document.createTextNode(key);
+      keyCell.appendChild(keyText);
+      
+      var valueCell = newTableRow.insertCell(1);
+      var valueText = document.createTextNode(tableData[key]);
+      valueCell.appendChild(valueText);
+
+    });
 }
 
 function Person(height, weight) {
@@ -63,7 +110,7 @@ function calculateImc(dietician) {
   console.log('dietician is a person?');
   console.log(dietician instanceof Person);
 
-  calculateImcAPI(dietician);
+  calculateImcFetchAPI(dietician);
 }
 
 function buildCalculateImc() {
@@ -78,4 +125,6 @@ function buildCalculateImc() {
 window.onload = function() {
   var btn = document.querySelector('.data .form button');
   btn.addEventListener('click', buildCalculateImc());
+
+  callImcTableAPI();
 }
